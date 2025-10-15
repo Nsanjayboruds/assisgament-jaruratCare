@@ -66,7 +66,7 @@ npm run build
 ````
 
 ###⚙️ Project Structure:-
-````````
+```````` 
 Assignment-jaruratCare/
 ├── public/                 # Static assets (images, favicon, etc.)
 ├── src/
