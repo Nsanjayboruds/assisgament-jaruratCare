@@ -3,8 +3,16 @@
 import { useState, useMemo } from 'react';
 import type { Patient } from '@/lib/types';
 import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/navigation';
-import { ArrowRight, Search, User } from 'lucide-react';
+import {
+  ArrowRight,
+  Search,
+  User,
+  Mail,
+  Phone,
+  Globe,
+  MapPin,
+  Building,
+} from 'lucide-react';
 import {
   Card,
   CardContent,
@@ -15,6 +23,14 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { Separator } from '@/components/ui/separator';
 
 interface PatientsListProps {
   patients: Patient[];
@@ -22,7 +38,7 @@ interface PatientsListProps {
 
 export function PatientsList({ patients }: PatientsListProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const router = useRouter();
+  const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
   const filteredPatients = useMemo(() => {
     if (!searchTerm) {
@@ -74,9 +90,9 @@ export function PatientsList({ patients }: PatientsListProps) {
               <CardFooter>
                 <Button
                   className="w-full"
-                  onClick={() => router.push(`/patients/${patient.id}`)}
+                  onClick={() => setSelectedPatient(patient)}
                 >
-                  View Details <ArrowRight className="ml-2 h-4 w-4" />
+                  View Details
                 </Button>
               </CardFooter>
             </Card>
@@ -87,6 +103,94 @@ export function PatientsList({ patients }: PatientsListProps) {
           <p className="text-muted-foreground">No patients found.</p>
         </div>
       )}
+
+      <PatientDetailModal
+        patient={selectedPatient}
+        isOpen={!!selectedPatient}
+        onClose={() => setSelectedPatient(null)}
+      />
+    </div>
+  );
+}
+
+function PatientDetailModal({
+  patient,
+  isOpen,
+  onClose,
+}: {
+  patient: Patient | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
+  if (!patient) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-headline">
+            {patient.name}
+          </DialogTitle>
+          <DialogDescription>
+            Detailed information for {patient.username}
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-6 py-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-3">
+              Personal Information
+            </h3>
+            <div className="space-y-3">
+              <InfoItem icon={<User />} label="Username" value={patient.username} />
+              <InfoItem icon={<Mail />} label="Email" value={patient.email} />
+              <InfoItem icon={<Phone />} label="Phone" value={patient.phone} />
+              <InfoItem icon={<Globe />} label="Website" value={patient.website} />
+            </div>
+          </div>
+          <Separator />
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Address</h3>
+            <InfoItem
+              icon={<MapPin />}
+              label="Full Address"
+              value={`${patient.address.suite}, ${patient.address.street}, ${patient.address.city}, ${patient.address.zipcode}`}
+            />
+          </div>
+          <Separator />
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Company</h3>
+            <div className="space-y-3">
+              <InfoItem
+                icon={<Building />}
+                label="Company Name"
+                value={patient.company.name}
+              />
+              <InfoItem label="Catchphrase" value={`"${patient.company.catchPhrase}"`} />
+              <InfoItem label="Business" value={patient.company.bs} />
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InfoItem({
+  icon,
+  label,
+  value,
+}: {
+  icon?: React.ReactNode;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-3">
+      {icon && <div className="text-muted-foreground mt-1">{icon}</div>}
+      <div className="flex-1">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-sm text-muted-foreground">{value}</p>
+      </div>
     </div>
   );
 }
