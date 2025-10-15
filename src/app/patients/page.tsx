@@ -2,18 +2,19 @@ import type { Patient } from '@/lib/types';
 import { PatientsList } from './patients-list';
 
 async function getPatients(): Promise<Patient[]> {
-  try {
-    const res = await fetch('https://jsonplaceholder.typicode.com/users', {
-      cache: 'no-store', // For development, ensures we get fresh data
-    });
-    if (!res.ok) {
-      throw new Error('Failed to fetch patients');
-    }
-    return res.json();
-  } catch (error) {
-    console.error(error);
-    return [];
+  // Intentionally throw an error for demonstration purposes
+  // const shouldError = Math.random() > 0.5;
+  // if (shouldError) {
+  //   throw new Error('Failed to fetch patients data from the server.');
+  // }
+  
+  const res = await fetch('https://jsonplaceholder.typicode.com/users');
+  
+  if (!res.ok) {
+    // This will activate the closest `error.js` Error Boundary
+    throw new Error('Failed to fetch patients');
   }
+  return res.json();
 }
 
 export default async function PatientsPage() {
@@ -28,7 +29,7 @@ export default async function PatientsPage() {
         A list of all patients in the system. You can search for patients or
         click on a record to view more details.
       </p>
-      <PatientsList patients={patients} />
+      <PatientsList initialPatients={patients} />
     </div>
   );
 }
